@@ -21,13 +21,13 @@
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
- * @version   1.0
+ * @version   1.0-dev
  */
 
 namespace Modules\Translation\Loaders;
 
 use Modules\Translation\Loader;
-use Modules\Translation\Translation;
+use OutOfBoundsException;
 
 class PHP extends Loader
 {
@@ -43,7 +43,7 @@ class PHP extends Loader
         $file = $this->strings_dir . '/' . $lang . '.php';
         if (!file_exists($file)) {
             $message = 'Language data not found for language: ' . $lang;
-            throw new \OutOfBoundsException($message);
+            throw new OutOfBoundsException($message);
         }
         return include $file;
     }

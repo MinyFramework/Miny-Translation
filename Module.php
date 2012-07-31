@@ -21,18 +21,20 @@
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
- * @version   1.0
+ * @version   1.0-dev
  */
 
 namespace Modules\Translation;
 
-use \Miny\Application\Application;
+use Miny\Application\Application;
 
 class Module extends \Miny\Application\Module
 {
     public function init(Application $app)
     {
         $app->add('translation', __NAMESPACE__ . '\Translation');
+        $app->getDescriptor('view')
+                ->addMethodCall('addMethod', 't', '*translation::get');
     }
 
 }

@@ -21,7 +21,7 @@
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
- * @version   1.0
+ * @version   1.0-dev
  */
 
 namespace Modules\Translation;
@@ -30,10 +30,24 @@ class Translation
 {
     private $strings = array();
     private $rules = array();
+    private static $lang_rules = array(
+        'hu' => array(),
+        'en' => array(),
+    );
+
+    public static function addRules($lang, array $rules)
+    {
+        self::$lang_rules[$lang] = $rules;
+    }
+
+    public static function getRules($lang)
+    {
+        return isset(self::$lang_rules[$lang]) ? self::$lang_rules[$lang] : array();
+    }
 
     public function __construct($lang, Loader $loader)
     {
-        foreach (LanguageRules::getRules($lang) as $name => $rule) {
+        foreach (self::getRules($lang) as $name => $rule) {
             $rule = preg_replace('/[^n0-9\w=\-+%<>]/', '', $rule);
             $this->rules[$name] = $rule;
         }
@@ -82,8 +96,7 @@ class Translation
             $string = $key;
         }
         if (is_array($string)) {
-            $str = $this->getStringForN($string, $num);
-            $string = is_null($str) ? $key : $str;
+            $string = $this->getStringForN($string, $num) ? : $key;
         }
 
         $arg_num = func_num_args();
