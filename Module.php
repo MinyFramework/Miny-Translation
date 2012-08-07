@@ -33,7 +33,7 @@ class Module extends \Miny\Application\Module
     public function init(Application $app)
     {
         $app->add('translation', __NAMESPACE__ . '\Translation');
-        $app->getDescriptor('view')
+        $app->getBlueprint('view')
                 ->addMethodCall('addMethod', 't', '*translation::get');
     }
 
