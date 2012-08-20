@@ -25,23 +25,29 @@ class Translation
 
     public static function getRules($lang)
     {
-        return isset(self::$lang_rules[$lang]) ? self::$lang_rules[$lang] : array();
+        $return = array();
+        if (isset(self::$lang_rules[$lang])) {
+            foreach (self::$lang_rules[$lang] as $name => $rule) {
+                $return[$name] = preg_replace('/[^n0-9\w=\-+%<>]/', '', $rule);
+            }
+        }
+        return $return;
     }
 
-    public function __construct($lang, Loader $loader)
+    public function __construct($lang, iLoader $loader)
     {
-        foreach (self::getRules($lang) as $name => $rule) {
-            $rule = preg_replace('/[^n0-9\w=\-+%<>]/', '', $rule);
-            $this->rules[$name] = $rule;
-        }
-        $this->strings = $loader->load($lang);
+        $this->rules = self::getRules($lang);
+        $this->addStrings($loader->load($lang));
     }
 
     public function addStrings(array $strings)
     {
-        foreach ($strings as $key => $string) {
-            $this->addString($key, $string);
+        foreach ($strings as &$string) {
+            if (is_array($string) && count($string) == 1) {
+                $string = current($string);
+            }
         }
+        $this->strings = $strings + $this->strings;
     }
 
     public function addString($key, $string)
