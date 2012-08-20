@@ -60,7 +60,7 @@ class Translation
 
     private function getStringForN(array $string, $num)
     {
-        $fallback = NULL;
+        $fallback = $string;
         foreach ($string as $q => $str) {
             if (is_int($q)) {
                 if ($num === $q) {
@@ -84,15 +84,14 @@ class Translation
         return eval('return (' . $rule . ');');
     }
 
-    public function get($key, $num = NULL)
+    public function get($string, $num = NULL)
     {
-        if (isset($this->strings[$key])) {
-            $string = $this->strings[$key];
-        } else {
-            $string = $key;
+        if (isset($this->strings[$string])) {
+            $string = $this->strings[$string];
         }
+
         if (is_array($string)) {
-            $string = $this->getStringForN($string, $num) ? : $key;
+            $string = $this->getStringForN($string, $num);
         }
 
         $arg_num = func_num_args();
