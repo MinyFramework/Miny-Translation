@@ -16,7 +16,7 @@ class Module extends \Miny\Application\Module
     public function init(Application $app)
     {
         $app->add('translation', __NAMESPACE__ . '\Translation');
-        $app->getBlueprint('view')
+        $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 't', '*translation::get');
     }
 
