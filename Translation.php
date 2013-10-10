@@ -58,7 +58,7 @@ class Translation
         $this->strings[$key] = $string;
     }
 
-    private function getStringForN(array $string, $num)
+    private function getPluralString(array $string, $num)
     {
         $fallback = $string;
         foreach ($string as $q => $str) {
@@ -91,7 +91,7 @@ class Translation
         }
 
         if (is_array($string)) {
-            $string = $this->getStringForN($string, $num);
+            $string = $this->getPluralString($string, $num);
         }
 
         $arg_num = func_num_args();
