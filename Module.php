@@ -15,7 +15,14 @@ class Module extends \Miny\Application\Module
 {
     public function init(BaseApplication $app)
     {
-        $app->add('translation', __NAMESPACE__ . '\Translation');
+        $parameters = $app->getParameters();
+        $parameters['translation:strings'] = array();
+        $parameters['translation:loaders'] = array(
+            'php' => __NAMESPACE__ . '\Loaders\PHP'
+        );
+
+        $app->add('translation', __NAMESPACE__ . '\Translation')
+                ->setArguments('@translation', $parameters, '@translation:loaders:{@translation:loader}');
         $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 't', '*translation::get');
     }

@@ -9,10 +9,11 @@
 
 namespace Modules\Translation;
 
+use InvalidArgumentException;
+use Miny\Factory\ParameterContainer;
+
 class Translation
 {
-    private $strings = array();
-    private $rules = array();
     private static $lang_rules = array(
         'hu' => array(),
         'en' => array(),
@@ -34,28 +35,46 @@ class Translation
         return $return;
     }
 
-    public function __construct($lang, iLoader $loader)
+    /**
+     * @var string[]
+     */
+    private $rules = array();
+
+    /**
+     * @var ParameterContainer
+     */
+    private $container;
+
+    public function __construct(array $config, ParameterContainer $container, $loader_class)
     {
+        $lang = $config['language'];
+        $strings = $loader_class::load($config['directory'], $config['language']);
+
         $this->rules = self::getRules($lang);
-        $this->addStrings($loader->load($lang));
+        $this->container = $container;
+        $this->addStrings($strings);
+    }
+
+    private function normalize($string)
+    {
+        if (is_array($string) && count($string) == 1) {
+            $string = current($string);
+        }
+        return $string;
     }
 
     public function addStrings(array $strings)
     {
         foreach ($strings as &$string) {
-            if (is_array($string) && count($string) == 1) {
-                $string = current($string);
-            }
+            $string = $this->normalize($string);
         }
-        $this->strings = $strings + $this->strings;
+        $this->container['translation:strings'] += $strings;
     }
 
     public function addString($key, $string)
     {
-        if (is_array($string) && count($string) == 1) {
-            $string = current($string);
-        }
-        $this->strings[$key] = $string;
+        $string = $this->normalize($string);
+        $this->container['translation:strings'] += array($key => $string);
     }
 
     private function getPluralString(array $string, $num)
@@ -84,27 +103,44 @@ class Translation
         return eval('return (' . $rule . ');');
     }
 
-    public function get($string, $num = NULL)
+    private function replacePlaceholders($string, array $parameters)
     {
-        if (isset($this->strings[$string])) {
-            $string = $this->strings[$string];
-        }
-
-        if (is_array($string)) {
-            $string = $this->getPluralString($string, $num);
-        }
-
-        $arg_num = func_num_args();
-        if ($arg_num > 1) {
-            $keys = array();
-            $vals = array();
-            for ($i = 1; $i < $arg_num; ++$i) {
-                $keys[] = '{' . ($i - 1) . '}';
-                $vals[] = func_get_arg($i);
+        if (!empty($parameters)) {
+            $replaces = array();
+            foreach ($parameters as $i => $arg) {
+                $replaces['{' . $i . '}'] = $arg;
             }
-            $string = str_replace($keys, $vals, $string);
+            $string = str_replace(array_keys($replaces), $replaces, $string);
         }
         return $string;
+    }
+
+    private function getTranslated($string)
+    {
+        $strings = $this->container['translation']['strings'];
+        if (isset($strings[$string])) {
+            $string = $strings[$string];
+        }
+        return $string;
+    }
+
+    public function get($string)
+    {
+        if (is_array($string)) {
+            $args = $string;
+        } else {
+            $args = func_get_args();
+        }
+        $untranslated = array_shift($args);
+        $string = $this->getTranslated($untranslated);
+
+        if (is_array($string)) {
+            if (!isset($args[0])) {
+                throw new InvalidArgumentException('Must supply a quantity for plural strings.');
+            }
+            $string = $this->getPluralString($string, $args[0]);
+        }
+        return $this->replacePlaceholders($string, $args);
     }
 
 }

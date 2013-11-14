@@ -9,23 +9,16 @@
 
 namespace Modules\Translation\Loaders;
 
+use InvalidArgumentException;
 use Modules\Translation\iLoader;
-use OutOfBoundsException;
 
 class PHP implements iLoader
 {
-    private $strings_dir;
-
-    public function __construct($dir)
+    public static function load($dir, $lang)
     {
-        $this->strings_dir = $dir;
-    }
-
-    public function load($lang)
-    {
-        $file = $this->strings_dir . '/' . $lang . '.php';
+        $file = sprintf('%s/%s.php', $dir, $lang);
         if (!file_exists($file)) {
-            throw new OutOfBoundsException('Language data not found for language: ' . $lang);
+            throw new InvalidArgumentException('Language file not found: ' . $lang);
         }
         return include $file;
     }

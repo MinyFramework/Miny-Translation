@@ -11,5 +11,5 @@ namespace Modules\Translation;
 
 interface iLoader
 {
-    public function load($lang);
+    public static function load($dir, $lang);
 }
