@@ -25,6 +25,11 @@ class Module extends \Miny\Application\Module
                 ->setArguments('@translation', $parameters, '@translation:loaders:{@translation:loader}');
         $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 't', '*translation::get');
+
+        $this->ifModule('Templating', function()use($app){
+            $app->getBlueprint('template_plugins')
+                ->addMethodCall('addMethod', 't', '*translation::get');
+        });
     }
 
 }
