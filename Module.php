@@ -13,9 +13,10 @@ use Miny\Application\BaseApplication;
 
 class Module extends \Miny\Application\Module
 {
+
     public function init(BaseApplication $app)
     {
-        $parameters = $app->getParameters();
+        $parameters                        = $app->getParameters();
         $parameters['translation:strings'] = array();
         $parameters['translation:loaders'] = array(
             'php' => __NAMESPACE__ . '\Loaders\PHP'
@@ -26,10 +27,13 @@ class Module extends \Miny\Application\Module
         $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 't', '*translation::get');
 
-        $this->ifModule('Templating', function()use($app){
-            $app->getBlueprint('template_plugins')
-                ->addMethodCall('addMethod', 't', '*translation::get');
-        });
-    }
 
+        $this->ifModule('Templating', function()use($app) {
+            $app->add('translation_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
+                    ->setArguments('t', '*translation::get', false);
+            $app->getBlueprint('template_environment')
+                    ->addMethodCall('addFunction', '&translation_function');
+        });
+
+    }
 }
