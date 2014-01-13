@@ -28,7 +28,7 @@ class Module extends \Miny\Application\Module
 
         $this->ifModule('Templating', function()use($app) {
             $app->add('translation_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
-                    ->setArguments('t', '*translation::get', false);
+                    ->setArguments('t', '*translation::get');
             $app->getBlueprint('template_environment')
                     ->addMethodCall('addFunction', '&translation_function');
         });
