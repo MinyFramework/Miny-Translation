@@ -14,24 +14,31 @@ use Miny\Application\BaseApplication;
 class Module extends \Miny\Modules\Module
 {
 
+    public function defaultConfiguration()
+    {
+        return array(
+            'translation' => array(
+                'strings' => array(),
+                'loaders' => array(
+                    'php' => __NAMESPACE__ . '\Loaders\PHP'
+                )
+            )
+        );
+    }
+
     public function init(BaseApplication $app)
     {
-        $parameters                        = $app->getParameters();
-        $parameters['translation:strings'] = array();
-        $parameters['translation:loaders'] = array(
-            'php' => __NAMESPACE__ . '\Loaders\PHP'
-        );
+        $factory    = $app->getFactory();
+        $parameters = $factory->getParameters();
 
-        $app->add('translation', __NAMESPACE__ . '\Translation')
+        $factory->add('translation', __NAMESPACE__ . '\Translation')
                 ->setArguments('@translation', $parameters, '@translation:loaders:{@translation:loader}');
 
-
-        $this->ifModule('Templating', function()use($app) {
-            $app->add('translation_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
+        $this->ifModule('Templating', function() use($factory) {
+            $factory->add('translation_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
                     ->setArguments('t', '*translation::get');
-            $app->getBlueprint('template_environment')
+            $factory->getBlueprint('template_environment')
                     ->addMethodCall('addFunction', '&translation_function');
         });
-
     }
 }
