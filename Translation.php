@@ -10,7 +10,6 @@
 namespace Modules\Translation;
 
 use InvalidArgumentException;
-use Miny\Factory\ParameterContainer;
 
 class Translation
 {
@@ -41,40 +40,33 @@ class Translation
     private $rules = array();
 
     /**
-     * @var ParameterContainer
+     * @var array
      */
-    private $container;
+    private $strings;
 
-    public function __construct(array $config, ParameterContainer $container, $loader_class)
+    public function __construct(array $config, $loader_class)
     {
         $lang = $config['language'];
         $strings = $loader_class::load($config['directory'], $config['language']);
 
         $this->rules = self::getRules($lang);
-        $this->container = $container;
+        $this->strings = $config['strings'];
         $this->addStrings($strings);
-    }
-
-    private function normalize($string)
-    {
-        if (is_array($string) && count($string) == 1) {
-            $string = current($string);
-        }
-        return $string;
     }
 
     public function addStrings(array $strings)
     {
-        foreach ($strings as &$string) {
-            $string = $this->normalize($string);
+        foreach ($strings as $string) {
+            $this->addString($string);
         }
-        $this->container['translation:strings'] += $strings;
     }
 
     public function addString($key, $string)
     {
-        $string = $this->normalize($string);
-        $this->container['translation:strings'] += array($key => $string);
+        if (is_array($string) && count($string) == 1) {
+            $string = current($string);
+        }
+        $this->strings[$key] = $string;
     }
 
     private function getPluralString(array $string, $num)
@@ -117,9 +109,8 @@ class Translation
 
     private function getTranslated($string)
     {
-        $strings = $this->container['translation']['strings'];
-        if (isset($strings[$string])) {
-            $string = $strings[$string];
+        if (isset($this->strings[$string])) {
+            $string = $this->strings[$string];
         }
         return $string;
     }

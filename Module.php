@@ -29,10 +29,9 @@ class Module extends \Miny\Modules\Module
     public function init(BaseApplication $app)
     {
         $factory    = $app->getFactory();
-        $parameters = $factory->getParameters();
 
         $factory->add('translation', __NAMESPACE__ . '\Translation')
-                ->setArguments('@translation', $parameters, '@translation:loaders:{@translation:loader}');
+                ->setArguments('@translation', '@translation:loaders:{@translation:loader}');
 
         $this->ifModule('Templating', function() use($factory) {
             $factory->add('translation_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
