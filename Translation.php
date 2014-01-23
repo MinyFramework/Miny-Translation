@@ -47,17 +47,16 @@ class Translation
     public function __construct(array $config, $loader_class)
     {
         $lang = $config['language'];
-        $strings = $loader_class::load($config['directory'], $config['language']);
 
         $this->rules = self::getRules($lang);
         $this->strings = $config['strings'];
-        $this->addStrings($strings);
+        $this->addStrings($loader_class::load($config['directory'], $config['language']));
     }
 
     public function addStrings(array $strings)
     {
-        foreach ($strings as $string) {
-            $this->addString($string);
+        foreach ($strings as $key => $string) {
+            $this->addString($key, $string);
         }
     }
 
