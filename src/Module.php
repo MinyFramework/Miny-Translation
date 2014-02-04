@@ -10,6 +10,7 @@
 namespace Modules\Translation;
 
 use Miny\Application\BaseApplication;
+use Miny\Factory\Container;
 
 class Module extends \Miny\Modules\Module
 {
@@ -28,16 +29,29 @@ class Module extends \Miny\Modules\Module
 
     public function init(BaseApplication $app)
     {
-        $factory    = $app->getFactory();
+        $container = $app->getContainer();
 
-        $factory->add('translation', __NAMESPACE__ . '\Translation')
-                ->setArguments('@translation', '@translation:loaders:{@translation:loader}');
+        $container->addAlias(
+            __NAMESPACE__ . '\Translation',
+            null,
+            array('@translation', '@translation:loaders:{@translation:loader}')
+        );
 
-        $this->ifModule('Templating', function() use($factory) {
-            $factory->add('translation_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
-                    ->setArguments('t', '*translation::get');
-            $factory->getBlueprint('template_environment')
-                    ->addMethodCall('addFunction', '&translation_function');
-        });
+        $this->ifModule(
+            'Templating',
+            function () use ($container) {
+                $container->addCallback(
+                    '\\Modules\\Templating\\Environment',
+                    function (Environment $environment, Container $container) {
+                        $environment->addFunction(
+                            new \Modules\Templating\Compiler\Functions\CallbackFunction('t', array(
+                                $container->get(__NAMESPACE__.'\\Translation', 'get')
+                            ))
+                        );
+                    }
+                );
+
+            }
+        );
     }
 }
