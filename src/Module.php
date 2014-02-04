@@ -11,6 +11,7 @@ namespace Modules\Translation;
 
 use Miny\Application\BaseApplication;
 use Miny\Factory\Container;
+use Modules\Templating\Environment;
 
 class Module extends \Miny\Modules\Module
 {
