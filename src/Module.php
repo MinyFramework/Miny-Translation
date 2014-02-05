@@ -46,7 +46,8 @@ class Module extends \Miny\Modules\Module
                     function (Environment $environment, Container $container) {
                         $environment->addFunction(
                             new \Modules\Templating\Compiler\Functions\CallbackFunction('t', array(
-                                $container->get(__NAMESPACE__.'\\Translation', 'get')
+                                $container->get(__NAMESPACE__.'\\Translation'),
+                                'get'
                             ))
                         );
                     }
