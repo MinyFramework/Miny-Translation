@@ -19,12 +19,11 @@ class Module extends \Miny\Modules\Module
     public function defaultConfiguration()
     {
         return array(
-            'translation' => array(
-                'strings' => array(),
-                'loaders' => array(
-                    'php' => __NAMESPACE__ . '\Loaders\PHP'
-                )
-            )
+            'strings' => array(),
+            'loaders' => array(
+                'php' => __NAMESPACE__ . '\Loaders\PHP'
+            ),
+            'loader'  => 'php'
         );
     }
 
@@ -32,10 +31,10 @@ class Module extends \Miny\Modules\Module
     {
         $container = $app->getContainer();
 
-        $container->addAlias(
-            __NAMESPACE__ . '\Translation',
-            null,
-            array('@translation', '@translation:loaders:{@translation:loader}')
+        $config = $this->getConfigurationTree();
+        $container->addConstructorArguments(
+            __NAMESPACE__ . '\\Translation',
+            array($config, $config['loaders'][$config['loader']])
         );
 
         $this->ifModule(
@@ -46,7 +45,7 @@ class Module extends \Miny\Modules\Module
                     function (Environment $environment, Container $container) {
                         $environment->addFunction(
                             new \Modules\Templating\Compiler\Functions\CallbackFunction('t', array(
-                                $container->get(__NAMESPACE__.'\\Translation'),
+                                $container->get(__NAMESPACE__ . '\\Translation'),
                                 'get'
                             ))
                         );

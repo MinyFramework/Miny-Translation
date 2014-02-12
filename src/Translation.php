@@ -10,6 +10,7 @@
 namespace Modules\Translation;
 
 use InvalidArgumentException;
+use Miny\Factory\AbstractConfigurationTree;
 
 class Translation
 {
@@ -44,7 +45,7 @@ class Translation
      */
     private $strings;
 
-    public function __construct(array $config, $loader_class)
+    public function __construct(AbstractConfigurationTree $config, $loader_class)
     {
         $lang = $config['language'];
 
