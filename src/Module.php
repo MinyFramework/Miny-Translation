@@ -34,7 +34,7 @@ class Module extends \Miny\Modules\Module
         $config = $this->getConfigurationTree();
         $container->addConstructorArguments(
             __NAMESPACE__ . '\\Translation',
-            array($config, $config['loaders'][$config['loader']])
+            $config, $config['loaders'][$config['loader']]
         );
 
         $this->ifModule(
