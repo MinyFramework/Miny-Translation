@@ -10,7 +10,6 @@
 namespace Modules\Translation;
 
 use InvalidArgumentException;
-use Miny\Factory\AbstractConfigurationTree;
 
 class Translation
 {
@@ -32,6 +31,7 @@ class Translation
                 $return[$name] = preg_replace('/[^n0-9\w=\-+%<>]/', '', $rule);
             }
         }
+
         return $return;
     }
 
@@ -45,11 +45,14 @@ class Translation
      */
     private $strings;
 
-    public function __construct(AbstractConfigurationTree $config, $loader_class)
+    public function __construct($config, $loader_class)
     {
+        if (!is_array($config) && !$config instanceof \ArrayAccess) {
+            throw new InvalidArgumentException('$config must be an array or an object with an array interface.');
+        }
         $lang = $config['language'];
 
-        $this->rules = self::getRules($lang);
+        $this->rules   = self::getRules($lang);
         $this->strings = $config['strings'];
         $this->addStrings($loader_class::load($config['directory'], $config['language']));
     }
@@ -83,6 +86,7 @@ class Translation
                 return $str;
             }
         }
+
         return $fallback;
     }
 
@@ -92,6 +96,7 @@ class Translation
             return false;
         }
         $rule = str_replace('n', $num, $this->rules[$rule]);
+
         return eval('return (' . $rule . ');');
     }
 
@@ -104,6 +109,7 @@ class Translation
             }
             $string = str_replace(array_keys($replaces), $replaces, $string);
         }
+
         return $string;
     }
 
@@ -112,6 +118,7 @@ class Translation
         if (isset($this->strings[$string])) {
             $string = $this->strings[$string];
         }
+
         return $string;
     }
 
@@ -123,7 +130,7 @@ class Translation
             $args = func_get_args();
         }
         $untranslated = array_shift($args);
-        $string = $this->getTranslated($untranslated);
+        $string       = $this->getTranslated($untranslated);
 
         if (is_array($string)) {
             if (!isset($args[0])) {
@@ -131,6 +138,7 @@ class Translation
             }
             $string = $this->getPluralString($string, $args[0]);
         }
+
         return $this->replacePlaceholders($string, $args);
     }
 
