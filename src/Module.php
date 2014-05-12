@@ -19,22 +19,16 @@ class Module extends \Miny\Modules\Module
     public function defaultConfiguration()
     {
         return array(
-            'strings' => array(),
-            'loaders' => array(
-                'php' => __NAMESPACE__ . '\Loaders\PHP'
-            ),
-            'loader'  => 'php'
+            'strings' => array()
         );
     }
 
     public function init(BaseApplication $app)
     {
         $container = $app->getContainer();
-
-        $config = $this->getConfigurationTree();
         $container->addConstructorArguments(
             __NAMESPACE__ . '\\Translation',
-            $config, $config['loaders'][$config['loader']]
+            $this->getConfigurationTree()
         );
 
         $this->ifModule(

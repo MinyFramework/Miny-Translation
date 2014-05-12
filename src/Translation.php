@@ -13,21 +13,21 @@ use InvalidArgumentException;
 
 class Translation
 {
-    private static $lang_rules = array(
+    private static $langRules = array(
         'hu' => array(),
         'en' => array(),
     );
 
     public static function addRules($lang, array $rules)
     {
-        self::$lang_rules[$lang] = $rules;
+        self::$langRules[$lang] = $rules;
     }
 
     public static function getRules($lang)
     {
         $return = array();
-        if (isset(self::$lang_rules[$lang])) {
-            foreach (self::$lang_rules[$lang] as $name => $rule) {
+        if (isset(self::$langRules[$lang])) {
+            foreach (self::$langRules[$lang] as $name => $rule) {
                 $return[$name] = preg_replace('/[^n0-9\w=\-+%<>]/', '', $rule);
             }
         }
@@ -45,7 +45,7 @@ class Translation
      */
     private $strings;
 
-    public function __construct($config, $loader_class)
+    public function __construct($config)
     {
         if (!is_array($config) && !$config instanceof \ArrayAccess) {
             throw new InvalidArgumentException('$config must be an array or an object with an array interface.');
@@ -54,7 +54,20 @@ class Translation
 
         $this->rules   = self::getRules($lang);
         $this->strings = $config['strings'];
-        $this->addStrings($loader_class::load($config['directory'], $config['language']));
+
+        if(isset($config['directory'])) {
+            $this->addStrings($this->load($config['directory'], $config['language']));
+        }
+    }
+
+    public function load($dir, $lang)
+    {
+        $file = "{$dir}/{$lang}.php";
+        if (!file_exists($file)) {
+            throw new InvalidArgumentException("Language file not found: {$lang}");
+        }
+
+        return include $file;
     }
 
     public function addStrings(array $strings)
