@@ -11,7 +11,7 @@ namespace Modules\Translation;
 
 use Miny\Application\BaseApplication;
 use Miny\Factory\Container;
-use Modules\Templating\Environment;
+use Minty\Environment;
 
 class Module extends \Miny\Modules\Module
 {
@@ -35,7 +35,7 @@ class Module extends \Miny\Modules\Module
             'Templating',
             function () use ($container) {
                 $container->addCallback(
-                    '\\Modules\\Templating\\Environment',
+                    '\\Minty\\Environment',
                     function (Environment $environment, Container $container) {
                         $environment->addExtension(
                             new TemplateExtension(
